@@ -13,6 +13,7 @@
     "@radix-ui/react-label": "^2.0.2",
     "@tabler/icons-react": "^3.3.0",
     "autoprefixer": "^10.4.19",
+    "axios": "^1.6.8",
     "clsx": "^2.1.1",
     "framer-motion": "^11.1.7",
     "postcss": "^8.4.38",
