@@ -1,3 +1,4 @@
 import auth from "./auth.svg";
-
-export { auth };
+import eyeOpen from "./eye-open.svg";
+import eyeClose from "./eye-closed.svg";
+export { auth, eyeOpen, eyeClose };

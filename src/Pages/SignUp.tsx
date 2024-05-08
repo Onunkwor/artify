@@ -1,16 +1,82 @@
-import { auth } from "../assets/icons";
+import { auth, eyeClose, eyeOpen } from "../assets/icons";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { cn } from "../utils/cn";
+import { useNavigate } from "react-router-dom";
+import { ChangeEvent, useReducer, useState } from "react";
+import { toast } from "sonner";
+type State = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+type Action =
+  | { type: "FIRST_NAME"; payload: string }
+  | { type: "LAST_NAME"; payload: string }
+  | { type: "EMAIL"; payload: string }
+  | { type: "PASSWORD"; payload: string }
+  | { type: "CONFIRM_PASSWORD"; payload: string }
+  | { type: "RESET" };
 
 const SignUp = () => {
+  const navigate = useNavigate();
+  const InitialState: State = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  };
+  const reducer = (state: State, action: Action) => {
+    switch (action.type) {
+      case "FIRST_NAME":
+        return { ...state, firstName: action.payload };
+      case "LAST_NAME":
+        return { ...state, lastName: action.payload };
+      case "EMAIL":
+        return { ...state, email: action.payload };
+      case "PASSWORD":
+        return { ...state, password: action.payload };
+      case "CONFIRM_PASSWORD":
+        return { ...state, confirmPassword: action.payload };
+      case "RESET":
+        return InitialState;
+      default:
+        return state;
+    }
+  };
+  const [state, dispatch] = useReducer(reducer, InitialState);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    type: Action["type"]
+  ) => {
+    dispatch({ type, payload: e.target.value });
+  };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted");
+    if (state.password.length !== 8 && state.confirmPassword.length !== 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    if (state.password !== state.confirmPassword) {
+      toast.error("Please check the password");
+      return;
+    }
+    dispatch({ type: "RESET" });
+
+    // console.log(state);
+
+    navigate(
+      `/sign-up/otp?details=${encodeURIComponent(JSON.stringify(state))}`
+    );
   };
   return (
     <div className="overflow-hidden">
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center h-screen">
         <img
           src={auth}
           alt="auth"
@@ -29,11 +95,23 @@ const SignUp = () => {
             <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
               <LabelInputContainer>
                 <Label htmlFor="firstname">First name</Label>
-                <Input id="firstname" placeholder="Tyler" type="text" />
+                <Input
+                  id="firstname"
+                  placeholder="Tyler"
+                  type="text"
+                  value={state.firstName}
+                  onChange={(e) => handleChange(e, "FIRST_NAME")}
+                />
               </LabelInputContainer>
               <LabelInputContainer>
                 <Label htmlFor="lastname">Last name</Label>
-                <Input id="lastname" placeholder="Durden" type="text" />
+                <Input
+                  id="lastname"
+                  placeholder="Durden"
+                  type="text"
+                  value={state.lastName}
+                  onChange={(e) => handleChange(e, "LAST_NAME")}
+                />
               </LabelInputContainer>
             </div>
             <LabelInputContainer className="mb-4">
@@ -42,21 +120,51 @@ const SignUp = () => {
                 id="email"
                 placeholder="projectmayhem@fc.com"
                 type="email"
+                value={state.email}
+                onChange={(e) => handleChange(e, "EMAIL")}
               />
             </LabelInputContainer>
-            <LabelInputContainer className="mb-4">
+            <LabelInputContainer className="mb-4 relative">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" placeholder="••••••••" type="password" />
+              <Input
+                id="password"
+                placeholder="••••••••"
+                type={showPassword ? "text" : "password"}
+                value={state.password}
+                onChange={(e) => handleChange(e, "PASSWORD")}
+              />
+              <button
+                className="absolute right-3 top-6"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowPassword((prev) => !prev);
+                }}
+              >
+                <img src={showPassword ? eyeOpen : eyeClose} alt="eye" />
+              </button>
             </LabelInputContainer>
-            <LabelInputContainer className="mb-8">
-              <Label htmlFor="twitterpassword">Repeat password</Label>
+            <LabelInputContainer className="mb-8 relative">
+              <Label htmlFor="repeatpassword">Repeat password</Label>
               <Input
                 id="repeatpassword"
                 placeholder="••••••••"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
+                value={state.confirmPassword}
+                onChange={(e) => handleChange(e, "CONFIRM_PASSWORD")}
               />
+              <button
+                className="absolute right-3 top-6"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowConfirmPassword((prev) => !prev);
+                }}
+              >
+                <img src={showConfirmPassword ? eyeOpen : eyeClose} alt="eye" />
+              </button>
+              <p className="text-sm opacity-[0.6]">Minimum of 8 characters.</p>
             </LabelInputContainer>
-
             <button
               className="bg-[#6757ff] relative group/btn w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
               type="submit"
@@ -65,7 +173,7 @@ const SignUp = () => {
               <BottomGradient />
             </button>
 
-            {/* <div className="bg-gradient-to-r from-transparent via-[#6757ff] dark:via-[#6757ff] to-transparent my-8 h-[1px] w-full" /> */}
+            <div className="bg-gradient-to-r from-transparent via-[#6757ff] dark:via-[#6757ff] to-transparent my-8 h-[1px] w-full" />
           </form>
         </div>
       </div>

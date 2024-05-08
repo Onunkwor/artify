@@ -21,7 +21,7 @@ const Authentication = () => {
     },
   ];
   return (
-    <div className="flex flex-col items-center justify-center h-[40rem]">
+    <div className="flex flex-col items-center justify-center h-[40rem] lg:h-[37rem]">
       <p className="text-neutral-600 dark:text-neutral-800 text-base mb-10">
         The road to creativity starts from here
       </p>

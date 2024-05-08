@@ -4,6 +4,7 @@ import Authentication from "../Pages/Auth";
 import SignIn from "../Pages/SignIn";
 import SignUp from "../Pages/SignUp";
 import Layout from "../Layout/Layout";
+import Otp from "../Pages/Otp";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: "/sign-in",
     element: <SignIn />,
+  },
+  {
+    path: "/sign-up/otp",
+    element: <Otp />,
   },
 ]);
 const Router = () => {
