@@ -5,7 +5,8 @@ import { cn } from "../utils/cn";
 import { useNavigate } from "react-router-dom";
 import { ChangeEvent, useReducer, useState } from "react";
 import { toast } from "sonner";
-type State = {
+import { sendSignUpOtp } from "../lib/Api/api";
+export type State = {
   firstName: string;
   lastName: string;
   email: string;
@@ -56,8 +57,9 @@ const SignUp = () => {
   ) => {
     dispatch({ type, payload: e.target.value });
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (state.password.length !== 8 && state.confirmPassword.length !== 8) {
       toast.error("Password must be at least 8 characters");
       return;
@@ -66,9 +68,30 @@ const SignUp = () => {
       toast.error("Please check the password");
       return;
     }
-    dispatch({ type: "RESET" });
 
-    // console.log(state);
+    const sendOtp = new Promise((resolve, reject) => {
+      sendSignUpOtp({
+        email: state.email.toLowerCase(),
+        subject: "Email verification",
+        duration: 1,
+        message: "Verify your email with the code below",
+      })
+        .then((response) => {
+          resolve(response);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+
+    toast.promise(sendOtp, {
+      loading: "Sending otp...",
+      success: () => {
+        return "Check Email for Otp";
+      },
+    });
+
+    dispatch({ type: "RESET" });
 
     navigate(
       `/sign-up/otp?details=${encodeURIComponent(JSON.stringify(state))}`
