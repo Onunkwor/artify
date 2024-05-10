@@ -5,7 +5,7 @@ import { cn } from "../utils/cn";
 import { ChangeEvent, useReducer } from "react";
 import { signUserIn } from "../lib/Api/api";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 type State = {
   email: string;
   password: string;
@@ -46,7 +46,7 @@ const SignIn = () => {
     });
     if (login) {
       toast.success(`Welcome ${login.firstName}`);
-      localStorage.setItem("Aritfy-token", login.token);
+      localStorage.setItem("Artify-token", login.token);
       navigate("/");
     }
   };
@@ -96,7 +96,14 @@ const SignIn = () => {
               Sign in &rarr;
               <BottomGradient />
             </button>
-
+            <p>
+              <span className="opacity-[0.7] text-sm">
+                Don't have an account?{" "}
+              </span>
+              <Link to="/sign-up" className="text-sm text-[#6757ff]">
+                Sign-Up
+              </Link>
+            </p>
             <div className="bg-gradient-to-r from-transparent via-[#6757ff] dark:via-[#6757ff] to-transparent my-8 h-[1px] w-full" />
           </form>
         </div>

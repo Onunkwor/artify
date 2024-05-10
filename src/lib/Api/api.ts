@@ -22,8 +22,9 @@ export const sendSignUpOtp = async ({
       message,
     });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error sending user otp: ", error);
+    toast.error(JSON.stringify(error.message));
   }
 };
 
@@ -38,8 +39,9 @@ export const verifyOtp = async ({
     const url = `${serverUrl}/otp/verify`;
     const response = await axios.post(url, { email, otp });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error verifying otp: ", error);
+    toast.error(error.message);
   }
 };
 

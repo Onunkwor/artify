@@ -1,8 +1,10 @@
+/* eslint-disable no-control-regex */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { auth, eyeClose, eyeOpen } from "../assets/icons";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { cn } from "../utils/cn";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChangeEvent, useReducer, useState } from "react";
 import { toast } from "sonner";
 import { sendSignUpOtp } from "../lib/Api/api";
@@ -59,7 +61,11 @@ const SignUp = () => {
   };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    const regex =
+      /(?:[a-z0-9!#$%&'*+=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
+    if (!state.email.match(regex)) {
+      toast.error("Please enter a valid email address");
+    }
     if (state.password.length !== 8 && state.confirmPassword.length !== 8) {
       toast.error("Password must be at least 8 characters");
       return;
@@ -68,34 +74,29 @@ const SignUp = () => {
       toast.error("Please check the password");
       return;
     }
+    toast.message("Sending Otp...", { duration: 3000 });
 
-    const sendOtp = new Promise((resolve, reject) => {
-      sendSignUpOtp({
+    try {
+      // Show success toast
+      const response = await sendSignUpOtp({
         email: state.email.toLowerCase(),
         subject: "Email verification",
         duration: 1,
         message: "Verify your email with the code below",
-      })
-        .then((response) => {
-          resolve(response);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+      });
+      if (response) {
+        toast.success(
+          "OTP sent successfully. Check your email for verification code."
+        );
+        dispatch({ type: "RESET" });
 
-    toast.promise(sendOtp, {
-      loading: "Sending otp...",
-      success: () => {
-        return "Check Email for Otp";
-      },
-    });
-
-    dispatch({ type: "RESET" });
-
-    navigate(
-      `/sign-up/otp?details=${encodeURIComponent(JSON.stringify(state))}`
-    );
+        navigate(
+          `/sign-up/otp?details=${encodeURIComponent(JSON.stringify(state))}`
+        );
+      }
+    } catch (error) {
+      toast.error("Failed to send OTP. Please try again later.");
+    }
   };
   return (
     <div className="overflow-hidden">
@@ -106,7 +107,7 @@ const SignUp = () => {
           className="h-screen hidden lg:flex w-1/2 overflow-hidden"
         />
 
-        <div className="max-w-lg w-full mx-auto p-4 md:p-8 bg-white ">
+        <div className="max-w-lg mx-auto p-4 md:p-8 bg-white mt-10">
           <h2 className="font-bold text-xl text-neutral-800">
             Welcome to Artify
           </h2>
@@ -114,7 +115,7 @@ const SignUp = () => {
             SignUp to artify to continue to enjoy its amazing features
           </p>
 
-          <form className="my-8" onSubmit={handleSubmit}>
+          <form className="my-4" onSubmit={handleSubmit}>
             <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
               <LabelInputContainer>
                 <Label htmlFor="firstname">First name</Label>
@@ -195,7 +196,14 @@ const SignUp = () => {
               Sign up &rarr;
               <BottomGradient />
             </button>
-
+            <p>
+              <span className="opacity-[0.7] text-sm">
+                Already have an account?{" "}
+              </span>
+              <Link to="/sign-in" className="text-sm text-[#6757ff]">
+                Sign-in
+              </Link>
+            </p>
             <div className="bg-gradient-to-r from-transparent via-[#6757ff] dark:via-[#6757ff] to-transparent my-8 h-[1px] w-full" />
           </form>
         </div>
